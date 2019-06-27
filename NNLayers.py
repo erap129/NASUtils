@@ -1,4 +1,5 @@
 import random
+from config import config
 
 
 class Layer():
@@ -19,14 +20,16 @@ class InputLayer(Layer):
         self.shape_width = shape_width
 
 
-class FlattenLayer(Layer):
+class SqueezeLayer(Layer):
     def __init__(self):
         Layer.__init__(self)
 
 
 class DropoutLayer(Layer):
-    def __init__(self, rate=0.5):
+    def __init__(self, rate=None):
         Layer.__init__(self)
+        if rate is None:
+            rate = random.uniform(0, config['dropout_max_rate'])
         self.rate = rate
 
 
@@ -44,36 +47,47 @@ class ActivationLayer(Layer):
         self.activation_type = activation_type
 
 
+class LinearLayer(Layer):
+    # @initializer
+    def __init__(self, output_dim=None, name=None):
+        Layer.__init__(self, name)
+        if output_dim is None:
+            output_dim = random.randint(1, config['linear_max_dim'])
+        self.output_dim = output_dim
+
+
 class ConvLayer(Layer):
     # @initializer
-    def __init__(self, height=None, width=None, channels=None, name=None):
+    def __init__(self, height=None, width=None, channels=None, stride=None, name=None):
         Layer.__init__(self, name)
         if height is None:
-            height = random.randint(1, globals.get('kernel_height_max'))
+            height = random.randint(1, config['conv_max_height'])
         if width is None:
-            width = random.randint(1, globals.get('kernel_time_max'))
+            width = random.randint(1, config['conv_max_width'])
         if channels is None:
-            channels = random.randint(1, globals.get('filter_num_max'))
-        if globals.get('channel_dim') == 'channels':
-            height = 1
-        self.kernel_eeg_chan = height
-        self.kernel_time = width
-        self.filter_num = channels
+            channels = random.randint(1, config['conv_max_channels'])
+        if stride is None:
+            stride = random.randint(1, config['conv_max_stride'])
+        self.height = height
+        self.width = width
+        self.channels = channels
+        self.stride = stride
 
 
 class PoolingLayer(Layer):
     # @initializer
-    def __init__(self, pool_time=None, stride_time=None, mode='max', stride_eeg_chan=1, pool_eeg_chan=1):
+    def __init__(self, height=None, width=None, stride=None, mode='max'):
         Layer.__init__(self)
-        if pool_time is None:
-            pool_time = random.randint(1, globals.get('pool_time_max'))
-        if stride_time is None:
-            stride_time = random.randint(1, globals.get('pool_time_max'))
-        self.pool_time = pool_time
-        self.stride_time = stride_time
+        if height is None:
+            height = random.randint(1, config['pool_max_height'])
+        if width is None:
+            width = random.randint(1, config['pool_max_width'])
+        if stride is None:
+            stride = random.randint(1, config['pool_max_stride'])
+        self.height = height
+        self.width = width
+        self.stride = stride
         self.mode = mode
-        self.stride_eeg_chan = stride_eeg_chan
-        self.pool_eeg_chan = pool_eeg_chan
 
 
 class IdentityLayer(Layer):
