@@ -1,14 +1,11 @@
 import torch
 from collections import defaultdict
 from functools import reduce
-from config import config, init_configurations
 import networkx as nx
 import random
 import models_generation
 import numpy as np
 from copy import deepcopy
-
-
 
 
 def add_raw_to_weighted_population(pop, raw):
@@ -391,7 +388,4 @@ def evaluate_single_model(model, X, y, eval_func):
         return eval_func(pred_labels, y)
 
 
-init_configurations(False, 10, [10,1], 2, 2, 2, 2, 2, 2, 2, 2, 0.5, 10, 300, 300, 3, 2)
-model = models_generation.random_model()
-pytorch_model = models_generation.new_model_from_structure_pytorch(model)
-print(pytorch_model)
+
