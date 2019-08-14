@@ -2,7 +2,7 @@ config = {}
 
 
 def init_configurations(grid,
-                        pop_size,
+                        population_size,
                         max_network_depth,
                         max_network_parallel_layers,
                         num_classes,
