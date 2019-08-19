@@ -1,5 +1,7 @@
 import copy
 import os
+import uuid
+
 import pandas as pd
 
 from NNLayers import *
@@ -119,20 +121,25 @@ def initialize_population():
         pass
     else:
         for i in range(config['population_size']):
+            model_id = uuid.uuid4()
             new_rand_model = random_model(config['max_network_depth'])
-            population.append(new_rand_model)
+            population.append({'model_id': model_id, 'model': new_rand_model})
 
     save_abstract_models_to_csv(population)
     return population
 
 
 def save_abstract_models_to_csv(models_list):
-    abstract_models_df = pd.DataFrame(columns=['network_layers', 'network_depth', 'config'])
+    abstract_models_df = pd.DataFrame(columns=['model_id','model_layers', 'model_depth', 'config'])
 
-    for model in models_list:
+    for model_tuple in models_list:
+
+        model = model_tuple.get('model')
+        model_id = model_tuple.get('model_id')
+
         abstract_models_df = abstract_models_df.append(
-            {'network_layers': [str(layer) for layer in model],
-             'network_depth': get_model_true_depth(model), 'config': config}, ignore_index=True)
+            {'model_id': model_id, 'model_layers': [str(layer) for layer in model],
+             'model_depth': get_model_true_depth(model), 'config': config}, ignore_index=True)
     models_save_path = os.path.dirname(config['models_save_path'])
     if not os.path.exists(models_save_path):
         os.makedirs(models_save_path)

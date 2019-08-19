@@ -29,8 +29,8 @@ def main():
                         models_save_path='generated_files/')
 
     pop = initialize_population()
-    model = pop[0]
-    model = finalize_model(model)
+    model_tuple = pop[0]
+    model = finalize_model(model_tuple.get('model'))
     print_model_structure(model)
     pytorch_model = create_pytorch_model(model, apply_fix=True)
     train_model(pytorch_model)

@@ -1,11 +1,37 @@
+import os
+
 import torch
 import torchvision
 import torchvision.transforms as transforms
 import torch.optim as optim
 from torch import nn
 
+# from torch.utils.tensorboard import SummaryWriter
+
+
 from torch.utils.data import Dataset
 from config import config
+import logging
+
+# ============================= Logger Settings ========================================================================
+
+
+save_path = "generated_files/training_logs/"
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
+
+logger = logging.getLogger('pytorch')
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+file_handler = logging.FileHandler(save_path + 'torch.log', mode='w')
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
+
+# ========================================================================================================
 
 
 def train_model(model):
@@ -43,5 +69,13 @@ def train_model(model):
                 print('[Epoch : %d Iteration : %5d loss: %.3f]' %
                       (epoch + 1, i + 1, running_loss / 200))
                 running_loss = 0.0
+
+            # printing the network weights every 50 iterations
+            if i % 50 == 0:
+                for layer_name, layer_params in model.named_parameters():
+                    print(layer_name, layer_params.size(), layer_params)
+
+                logger.info('[Epoch : %d Iteration : %5d loss: %.3f]' %
+                            (epoch + 1, i + 1, running_loss / 200))
 
     print('Finished Training')
