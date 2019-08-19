@@ -18,7 +18,12 @@ def init_configurations(grid,
                         dataset_height,
                         dataset_width,
                         dataset_channels,
-                        batch_size):
+                        batch_size,
+                        models_save_path):
     global config
     for key, value in locals().items():
         config[key] = value
+
+
+
+# class PredefindConfigurations:

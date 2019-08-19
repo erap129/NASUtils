@@ -1,13 +1,16 @@
 import copy
+import os
+import pandas as pd
+
 from NNLayers import *
 
 
 # ================================ UTILS ===============================================================================
 
 
-def print_structure(structure):
+def print_model_structure(structure):
     print('---------------model structure-----------------')
-    for layer in structure.values():
+    for layer in structure:
         attrs = vars(layer)
         print('layer type:', layer.__class__.__name__)
         print(attrs)
@@ -23,6 +26,7 @@ def random_model(max_network_depth):
     if check_legal_model(layer_collection):
         return layer_collection
     else:
+        print('Creating a new Random model as previous model was illegal')
         return random_model(max_network_depth)
 
 
@@ -82,6 +86,7 @@ def finalize_model(layer_collection):
         # return ModelFromGrid(layer_collection)
         pass
     else:
+        # TODO - shouldnt we add input layer here ???
         layer_collection = copy.deepcopy(layer_collection)
         output_layer = LinearLayer(config['num_classes'])
         activation = ActivationLayer('softmax')
@@ -90,10 +95,24 @@ def finalize_model(layer_collection):
     return layer_collection
 
 
+def get_model_true_depth(model):
+    model_depth = 0
+    if config['grid']:
+        # TODO - add support for parallel layers and skip connections
+        print('Error - add support for parallel layers and skip connections')
+        pass
+    else:
+        for layer in model:
+            if not isinstance(layer, IdentityLayer):
+                model_depth += 1
+    return model_depth
+
+
 # ========================== Population Creation =======================================================================
 
 def initialize_population():
     population = []
+
     if config['grid']:
         # TODO - support parallel layers and skip connections
         # model_init = random_grid_model
@@ -102,9 +121,20 @@ def initialize_population():
         for i in range(config['population_size']):
             new_rand_model = random_model(config['max_network_depth'])
             population.append(new_rand_model)
+
+    save_abstract_models_to_csv(population)
     return population
 
 
-def save_abstract_model_to_csv():
-    # TODO - create a CSV file and save the models to it including all their meta-data
-    pass
+def save_abstract_models_to_csv(models_list):
+    abstract_models_df = pd.DataFrame(columns=['network_layers', 'network_depth', 'config'])
+
+    for model in models_list:
+        abstract_models_df = abstract_models_df.append(
+            {'network_layers': [str(layer) for layer in model],
+             'network_depth': get_model_true_depth(model), 'config': config}, ignore_index=True)
+    models_save_path = os.path.dirname(config['models_save_path'])
+    if not os.path.exists(models_save_path):
+        os.makedirs(models_save_path)
+
+    abstract_models_df.to_csv(models_save_path+'/abstract_models.csv', index=False)
